@@ -94,12 +94,12 @@ class SRModel(BaseModel):
 
     def optimize_parameters(self, current_iter):
         self.optimizer_g.zero_grad()
-        print("Lq", self.lq.shape)
-        print("Gt", self.gt.shape)
+        # print("Lq", self.lq.shape)
+        # print("Gt", self.gt.shape)
 
         self.output = self.net_g(self.lq)
-        print(self.gt.shape)
-        print(self.output.shape)
+        # print(self.gt.shape)
+        # print(self.output.shape)
         l_total = 0
         loss_dict = OrderedDict()
         # pixel loss
@@ -159,7 +159,9 @@ class SRModel(BaseModel):
             pbar = tqdm(total=len(dataloader), unit='image')
 
         for idx, val_data in enumerate(dataloader):
-            img_name = osp.splitext(osp.basename(val_data['lq_path'][0]))[0]
+            if idx > 0:
+                break
+            img_name = osp.splitext(osp.basename(val_data['gt_path'][0]))[0]
             self.feed_data(val_data)
             self.test()
 
@@ -175,7 +177,7 @@ class SRModel(BaseModel):
             del self.lq
             del self.output
             torch.cuda.empty_cache()
-
+            # print("Gonna save")
             if save_img:
                 if self.opt['is_train']:
                     save_img_path = osp.join(self.opt['path']['visualization'], img_name,
@@ -188,6 +190,7 @@ class SRModel(BaseModel):
                         save_img_path = osp.join(self.opt['path']['visualization'], dataset_name,
                                                  f'{img_name}_{self.opt["name"]}.png')
                 imwrite(sr_img, save_img_path)
+                # print(" save img",save_img_path)
 
             if with_metrics:
                 # calculate metrics
